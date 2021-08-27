@@ -17,7 +17,7 @@ async function getLatLngFromAboutAddress (address) {
   return latLng
 }
 
-async function serchPoint (latLng) {
+async function getCorrectAdress (latLng) {
   const client = new Client({})
   const res = await client
     .geocode({
@@ -30,8 +30,26 @@ async function serchPoint (latLng) {
   console.log(res.data.results[0].formatted_address)
 }
 
+async function getNear (latLng) {
+  const client = new Client({})
+  const res = await client
+    .placesNearby({
+      params: {
+        location: latLng,
+        key: process.env.GOOGLE_MAPS_API_KEY,
+        radius: 400,
+        type: 'restaurant',
+        language: 'ja'
+      }
+    })
+  return res.data.results
+}
+
 async function main (address) {
   const latLng = await getLatLngFromAboutAddress(address)
-  serchPoint(latLng)
+  getCorrectAdress(latLng)
+  const nearStoresData = await getNear(latLng)
+  console.log(nearStoresData)
 }
+
 main(address)
