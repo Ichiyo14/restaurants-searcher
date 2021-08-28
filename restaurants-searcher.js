@@ -47,7 +47,7 @@ async function getNear (latLng) {
 
 const printFirstSession = (correctAdress, nearStoresData) => {
   console.log('検索している住所は' + correctAdress + 'です。')
-  console.log(nearStoresData.length)
+  console.log('周辺にあるお店は' + nearStoresData.length + '店です。')
 }
 
 const PlaceIdFromNearStoresData = (nearStoresData) => {
@@ -102,6 +102,26 @@ function sortByRating (detailedData) {
   })
 }
 
+const lunchTimeStores = []
+const dinnerTimeStores = []
+
+const normallyOpenForLunch = (periods) => {
+  return periods.some(x => x.open.time <= 1200)
+}
+const normallyOpenForDinner = (periods) => {
+  return periods.some(x => (x.open.time <= 1800) && (x.close.time >= 1900))
+}
+const openTime = (detailedData) => {
+  for (const storeData of detailedData) {
+    if (normallyOpenForLunch(storeData.opening_hours.periods)) { lunchTimeStores.push(storeData) }
+    if (normallyOpenForDinner(storeData.opening_hours.periods)) { dinnerTimeStores.push(storeData) }
+  }
+}
+const printChoises=()=>{
+  console.log('ランチ:' + lunchTimeStores.length + '店')
+  console.log('ディナー:' + dinnerTimeStores.length + '店')
+}
+
 async function main (address) {
   const latLng = await getLatLngFromAboutAddress(address)
   const correctAdress = await getCorrectAdress(latLng)
@@ -109,7 +129,8 @@ async function main (address) {
   printFirstSession(correctAdress, nearStoresData)
   const arrayOfPlaceId = PlaceIdFromNearStoresData(nearStoresData)
   const detailedData = await detailedDataOfArrayOfPlaceId(arrayOfPlaceId)
-  printAllStoresData(detailedData)
+  openTime(detailedData)
+  printChoises()
 }
 
 main(address)
