@@ -109,14 +109,14 @@ const detailedDataOfArrayOfPlaceId = async (arrayOfPlaceId) => {
   return sortByRating(detailedData)
 }
 
-const printStoresData = async(detailedData) => {
+const printStoresData = async (detailedData) => {
   for (const storeData of detailedData) {
     console.log('店舗名:' + storeData.name)
     console.log('住所:' + storeData.vicinity)
-    console.log('電話番号:' + storeData.formatted_phone_number)
+    if (!(storeData.formatted_phone_number === undefined)) { console.log('電話番号:' + storeData.formatted_phone_number) }
     console.log('URL:' + storeData.url)
-    console.log('評価:' + storeData.rating + '/5.0')
-    console.log('評価数:' + storeData.user_ratings_total)
+    storeData.rating === undefined ? console.log('誰も評価をしていません。') : console.log('評価:' + storeData.rating + '/5.0')
+    if (!(storeData.user_ratings_total === undefined)) { console.log('評価数:' + storeData.user_ratings_total) }
     if (storeData.opening_hours === undefined) {
       console.log('---------------------------------------------')
       continue
@@ -126,7 +126,7 @@ const printStoresData = async(detailedData) => {
     storeData.opening_hours.weekday_text.forEach(element => {
       console.log(element)
     })
-    console.log('---------------------------------------------')
+    console.log('----------------------------------------------')
   }
 }
 
@@ -146,16 +146,15 @@ const normallyOpenForLunch = (periods) => {
 }
 const normallyOpenForDinner = (periods) => {
   for (const state of periods) {
-    if (!state.hasOwnProperty('close')) {
-    return true
+    if (!hasProperty(state, 'close')) {
+      return true
+    }
   }
-}
   return periods.some(x => (x.open.time <= 1800) && (x.close.time >= 1900))
 }
 const openTime = (detailedData) => {
   for (const storeData of detailedData) {
     if (storeData.opening_hours === undefined) { continue }
-    console.log(storeData.opening_hours.periods)
     if (normallyOpenForLunch(storeData.opening_hours.periods)) { lunchTimeStores.push(storeData) }
     if (normallyOpenForDinner(storeData.opening_hours.periods)) { dinnerTimeStores.push(storeData) }
   }
@@ -187,7 +186,7 @@ async function main (address, radius) {
   const correctAdress = await getCorrectAdress(latLng)
   console.log('検索している住所は' + correctAdress + 'です。')
   const nearStoresData = await getNear(latLng, radius)
-  printFirstSession(nearStoresData,radius)
+  printFirstSession(nearStoresData, radius)
   // console.log(nearSoresData)
   const arrayOfPlaceId = PlaceIdFromNearStoresData(nearStoresData)
   const detailedData = await detailedDataOfArrayOfPlaceId(arrayOfPlaceId)
