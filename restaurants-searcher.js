@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 const { Client } = require('@googlemaps/google-maps-services-js')
 const argv = require('minimist')(process.argv.slice(2))
 const address = argv._[0]
