@@ -1,5 +1,8 @@
 const { Client } = require('@googlemaps/google-maps-services-js')
-const address = require('minimist')(process.argv.slice(2))._[0]
+const argv = require('minimist')(process.argv.slice(2))
+const address = argv._[0]
+const defaultRadius = 800
+const radius = (argv.r >= 10000 ? 10000 : argv.r) || defaultRadius
 
 async function getLatLngFromAboutAddress (address) {
   const client = new Client({})
@@ -30,14 +33,15 @@ async function getCorrectAdress (latLng) {
   return res.data.results[0].formatted_address
 }
 
-async function getNear (latLng) {
+async function getNear (latLng, radius) {
+
   const client = new Client({})
   const res = await client
     .placesNearby({
       params: {
         location: latLng,
         key: process.env.GOOGLE_MAPS_API_KEY,
-        radius: 100,
+        radius: radius,
         type: 'restaurant',
         language: 'ja'
       }
@@ -82,12 +86,15 @@ const detailedDataOfArrayOfPlaceId = async (arrayOfPlaceId) => {
 const printStoresData = (detailedData) => {
   for (const storeData of detailedData) {
     console.log('店舗名:' + storeData.name)
-    console.log(storeData.opening_hours.open_now ? '営業中' : '閉店中')
     console.log('住所:' + storeData.vicinity)
     console.log('電話番号:' + storeData.formatted_phone_number)
     console.log('URL:' + storeData.url)
     console.log('評価:' + storeData.rating + '/5.0')
     console.log('評価数:' + storeData.user_ratings_total)
+    if (storeData.opening_hours === undefined) {
+      console.log('---------------------------------------------')
+      continue}
+    console.log(storeData.opening_hours.open_now ? '営業中' : '閉店中')
     console.log('-------------------営業時間-------------------')
     storeData.opening_hours.weekday_text.forEach(element => {
       console.log(element)
@@ -115,6 +122,7 @@ const normallyOpenForDinner = (periods) => {
 }
 const openTime = (detailedData) => {
   for (const storeData of detailedData) {
+    if (storeData.opening_hours === undefined) {continue}
     if (normallyOpenForLunch(storeData.opening_hours.periods)) { lunchTimeStores.push(storeData) }
     if (normallyOpenForDinner(storeData.opening_hours.periods)) { dinnerTimeStores.push(storeData) }
   }
@@ -138,10 +146,10 @@ const printChoises = async (detailedData) => {
   if (answer === 'ディナー') { printStoresData(dinnerTimeStores) }
 }
 
-async function main (address) {
+async function main (address, radius) {
   const latLng = await getLatLngFromAboutAddress(address)
   const correctAdress = await getCorrectAdress(latLng)
-  const nearStoresData = await getNear(latLng)
+  const nearStoresData = await getNear(latLng, radius)
   printFirstSession(correctAdress, nearStoresData)
   const arrayOfPlaceId = PlaceIdFromNearStoresData(nearStoresData)
   const detailedData = await detailedDataOfArrayOfPlaceId(arrayOfPlaceId)
@@ -149,4 +157,4 @@ async function main (address) {
   printChoises(detailedData)
 }
 
-main(address)
+main(address, radius)
