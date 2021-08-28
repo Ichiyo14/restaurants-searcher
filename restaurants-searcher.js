@@ -76,7 +76,30 @@ const detailedDataOfArrayOfPlaceId = async (arrayOfPlaceId) => {
   for (const placeId of arrayOfPlaceId) {
     detailedData.push(await getDetailStoresData(placeId))
   }
-  return detailedData
+  return sortByRating(detailedData)
+}
+
+const printAllStoresData = (detailedData) => {
+  for (const storeData of detailedData) {
+    console.log(storeData.name)
+    console.log(storeData.opening_hours.open_now ? '営業中' : '閉店中')
+    console.log(storeData.vicinity)
+    console.log(storeData.formatted_phone_number)
+    console.log(storeData.url)
+    console.log(storeData.rating)
+    console.log(storeData.user_ratings_total)
+    console.log(storeData.opening_hours.weekday_text)
+    console.log(storeData.opening_hours.periods)
+    console.log('-----------------------')
+  }
+}
+
+function sortByRating (detailedData) {
+  return detailedData.sort(function (a, b) {
+    if (a.rating > b.rating) { return -1 }
+    if (a.rating < b.rating) { return 1 }
+    return 0
+  })
 }
 
 async function main (address) {
@@ -86,6 +109,7 @@ async function main (address) {
   printFirstSession(correctAdress, nearStoresData)
   const arrayOfPlaceId = PlaceIdFromNearStoresData(nearStoresData)
   const detailedData = await detailedDataOfArrayOfPlaceId(arrayOfPlaceId)
+  printAllStoresData(detailedData)
 }
 
 main(address)
