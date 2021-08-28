@@ -79,18 +79,20 @@ const detailedDataOfArrayOfPlaceId = async (arrayOfPlaceId) => {
   return sortByRating(detailedData)
 }
 
-const printAllStoresData = (detailedData) => {
+const printStoresData = (detailedData) => {
   for (const storeData of detailedData) {
-    console.log(storeData.name)
+    console.log('店舗名:' + storeData.name)
     console.log(storeData.opening_hours.open_now ? '営業中' : '閉店中')
-    console.log(storeData.vicinity)
-    console.log(storeData.formatted_phone_number)
-    console.log(storeData.url)
-    console.log(storeData.rating)
-    console.log(storeData.user_ratings_total)
-    console.log(storeData.opening_hours.weekday_text)
-    console.log(storeData.opening_hours.periods)
-    console.log('-----------------------')
+    console.log('住所:' + storeData.vicinity)
+    console.log('電話番号:' + storeData.formatted_phone_number)
+    console.log('URL:' + storeData.url)
+    console.log('評価:' + storeData.rating + '/5.0')
+    console.log('評価数:' + storeData.user_ratings_total)
+    console.log('-------------------営業時間-------------------')
+    storeData.opening_hours.weekday_text.forEach(element => {
+      console.log(element)
+    })
+    console.log('---------------------------------------------')
   }
 }
 
@@ -117,9 +119,23 @@ const openTime = (detailedData) => {
     if (normallyOpenForDinner(storeData.opening_hours.periods)) { dinnerTimeStores.push(storeData) }
   }
 }
-const printChoises=()=>{
-  console.log('ランチ:' + lunchTimeStores.length + '店')
-  console.log('ディナー:' + dinnerTimeStores.length + '店')
+
+function padStartWithBlank (number, length) {
+  return number.toString().padStart(length, ' ')
+}
+
+const printChoises = async (detailedData) => {
+  console.log('ランチ:  ' + (padStartWithBlank(lunchTimeStores.length, 3)) + '店')
+  console.log('ディナー:' + (padStartWithBlank(dinnerTimeStores.length, 3)) + '店')
+  const { Select } = require('enquirer')
+  const prompt = new Select({
+    message: 'どの時間帯のレストラン情報をみたいですか？',
+    choices: ['全レストラン', 'ランチ', 'ディナー']
+  })
+  const answer = await prompt.run()
+  if (answer === '全レストラン') { printStoresData(detailedData) }
+  if (answer === 'ランチ') { printStoresData(lunchTimeStores) }
+  if (answer === 'ディナー') { printStoresData(dinnerTimeStores) }
 }
 
 async function main (address) {
@@ -130,7 +146,7 @@ async function main (address) {
   const arrayOfPlaceId = PlaceIdFromNearStoresData(nearStoresData)
   const detailedData = await detailedDataOfArrayOfPlaceId(arrayOfPlaceId)
   openTime(detailedData)
-  printChoises()
+  printChoises(detailedData)
 }
 
 main(address)
