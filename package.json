@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "bin":{
-    "restaurants-searcher":"./index.js"
+  "bin": {
+    "restaurants-searcher": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.1.16",
-    "enquirer": "^2.3.6"
+    "enquirer": "^2.3.6",
+    "minimist": "^1.2.5"
   },
   "keywords": [
     "GoogleMaps",
