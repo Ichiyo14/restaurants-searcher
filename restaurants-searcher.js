@@ -27,7 +27,7 @@ async function getCorrectAdress (latLng) {
         language: 'ja'
       }
     })
-  console.log(res.data.results[0].formatted_address)
+  return res.data.results[0].formatted_address
 }
 
 async function getNear (latLng) {
@@ -37,7 +37,7 @@ async function getNear (latLng) {
       params: {
         location: latLng,
         key: process.env.GOOGLE_MAPS_API_KEY,
-        radius: 400,
+        radius: 100,
         type: 'restaurant',
         language: 'ja'
       }
@@ -45,11 +45,47 @@ async function getNear (latLng) {
   return res.data.results
 }
 
+const printFirstSession = (correctAdress, nearStoresData) => {
+  console.log('検索している住所は' + correctAdress + 'です。')
+  console.log(nearStoresData.length)
+}
+
+const PlaceIdFromNearStoresData = (nearStoresData) => {
+  const arrayOfPlaceId = []
+  nearStoresData.forEach(storeData => {
+    arrayOfPlaceId.push(storeData.place_id)
+  })
+  return arrayOfPlaceId
+}
+
+async function getDetailStoresData (placeId) {
+  const client = new Client({})
+  const res = await client
+    .placeDetails({
+      params: {
+        place_id: placeId,
+        key: process.env.GOOGLE_MAPS_API_KEY,
+        language: 'ja'
+      }
+    })
+  return res.data.result
+}
+
+const detailedDataOfArrayOfPlaceId = async (arrayOfPlaceId) => {
+  const detailedData = []
+  for (const placeId of arrayOfPlaceId) {
+    detailedData.push(await getDetailStoresData(placeId))
+  }
+  return detailedData
+}
+
 async function main (address) {
   const latLng = await getLatLngFromAboutAddress(address)
-  getCorrectAdress(latLng)
+  const correctAdress = await getCorrectAdress(latLng)
   const nearStoresData = await getNear(latLng)
-  console.log(nearStoresData)
+  printFirstSession(correctAdress, nearStoresData)
+  const arrayOfPlaceId = PlaceIdFromNearStoresData(nearStoresData)
+  const detailedData = await detailedDataOfArrayOfPlaceId(arrayOfPlaceId)
 }
 
 main(address)
