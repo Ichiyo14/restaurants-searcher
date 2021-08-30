@@ -189,7 +189,6 @@ async function main (address, radius) {
   console.log('検索している住所は' + correctAdress + 'です。')
   const nearStoresData = await getNear(latLng, radius)
   printFirstSession(nearStoresData, radius)
-  // console.log(nearSoresData)
   const arrayOfPlaceId = PlaceIdFromNearStoresData(nearStoresData)
   const detailedData = await detailedDataOfArrayOfPlaceId(arrayOfPlaceId)
   openTime(detailedData)
