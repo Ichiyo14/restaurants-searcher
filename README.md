@@ -21,7 +21,7 @@ option
 ```
 export GOOGLE_MAPS_API_KEY=あなたのGoogleMapsのAPIキーを入力してください
 restaurants-searcher 東京タワー -r 50
-辺50mにあるお店は10店です。
+周辺50mにあるお店は10店です。
 ランチ:    6店
 ディナー:  5店
 ? どの時間帯のレストラン情報をみたいですか？ …
@@ -46,3 +46,10 @@ URL:https://maps.google.com/...
 ----------------------------------------------
 ...
 ```
+### Google maps API keyの権限設定について
+本npmではGoogle maps APIのPlaces APIとGeocoding APIを使用しています。
+~~~
+error_message: 'This API project is not authorized to use this API.'
+~~~
+とエラーになった場合には、Places APIとGeocoding APIの権限が有効になっているか等のGoogle maps APIの制限状況をご確認ください。
+
